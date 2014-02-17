@@ -3,15 +3,14 @@
 
 #include "double_list/list.h"
 
-struct server {
+typedef struct{
         List *client_list;
         int port;
         int listener_d;
-};
-typedef struct server Server;
+}Server;
 
 Server *Server_create();
 void Server_open(Server* server, int port);
 void Server_close(Server* server);
-
+void Server_listen(Server* server);
 #endif
