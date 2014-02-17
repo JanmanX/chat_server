@@ -5,6 +5,7 @@
 #include "double_list/list.h"
 #include "dbg.h"
 #include "server.h"
+#include "client.h"
 
 Server *Server_create()
 {
@@ -42,7 +43,7 @@ void Server_listen(Server *server)
  
    Client *c = client_create();
    unsigned int address_size = sizeof(c->client_addr);
-    int foo = accept(server->listener_d, (struct sockaddr*)&client_addr, &address_size);
+    int foo = accept(server->listener_d, (struct sockaddr*)&c->client_addr, &address_size);
     check(foo != -1, "Can't open client socket");
 
     char *msg = "Connected...";

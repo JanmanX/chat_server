@@ -11,7 +11,7 @@ struct client {
 };
 typedef struct client Client;
 
-Client *client_create(int fd);
+Client *client_create();
 void client_destroy(Client* c);
 
 #endif

@@ -2,12 +2,10 @@
 
 #include "client.h"
 
-Client *client_create(int cd)
+Client *client_create()
 {
         Client *c = calloc(1, sizeof(Client)); // calloc for cleared memory
         check(c != NULL, "calloc returned NULL");
-
-        c->connect_d = cd;
 
         return c;
 
