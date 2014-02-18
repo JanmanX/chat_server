@@ -23,16 +23,20 @@ error:
 void Server_open(Server *server, int port)
 {
         server->port = port;
-        server->listener_d = socket(PF_INET, SOCK_STREAM, 0);
+        server->listener_d = socket(AF_INET, SOCK_STREAM, 0);
         check(server->listener_d != -1, "Can't open socket");
    
         server->running = 1;
 
-        struct sockaddr_in name;
-        name.sin_family = AF_INET;
-        name.sin_port = (in_port_t)htons(port);
-        name.sin_addr.s_addr = htonl(INADDR_ANY);
-        int c = bind(server->listener_d, (struct sockaddr*)&name, sizeof(name));
+        bzero((char *) &server->serv_addr, sizeof(server->serv_addr)); 
+        server->serv_addr.sin_family = AF_INET;
+        server->serv_addr.sin_port = (in_port_t)htons(port);
+        server->serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+
+        int c = bind(server->listener_d, 
+                        (struct sockaddr*)&server->serv_addr, 
+                        sizeof(server->serv_addr));
+
         check(c!=-1, "Can't bind socket");
 
         check(listen(server->listener_d, 10) != -1, "Can't listen");

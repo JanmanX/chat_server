@@ -9,7 +9,7 @@
 int main(int argc, char **argv)
 {
         Server *s = Server_create();
-        Server_open(s, 31338);
+        Server_open(s, 31339);
 
         // Server is running.
         sleep(60); // SLeep for 1 minute
