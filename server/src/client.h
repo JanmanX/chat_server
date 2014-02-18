@@ -7,7 +7,6 @@
 
 struct client {
         int connect_d;
-        struct sockaddr_storage client_addr;
 };
 typedef struct client Client;
 

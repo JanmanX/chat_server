@@ -11,12 +11,11 @@ typedef struct{
         int listener_d;
        
         volatile int running; 
-        pthread_t pthread;
-        pthread_mutex_t server_lock;        
+        pthread_t listen_thread;
 }Server;
 
 Server *Server_create();
 void Server_open(Server* server, int port);
 void Server_close(Server* server);
-void Server_listen(Server* server);
+void* Server_listen(Server* server);
 #endif

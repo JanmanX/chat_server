@@ -1,6 +1,6 @@
 CC=gcc
 CFLAGS=-Wall -g -Wextra -Isrc -rdynamic -DNDEBUG $(OPTFLAGS)
-LDFLAGS=
+LDFLAGS=-pthread
 SOURCES=$(wildcard src/**/*.c src/*.c src/**/*.h src/*.h)
 OBJECTS=$(wildcard src/**/*.o src/*.o,$(SOURCES))
 
