@@ -2,6 +2,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <pthread.h>
+#include <string.h>
 
 #include "double_list/list.h"
 #include "dbg.h"
@@ -25,10 +26,10 @@ void Server_open(Server *server, int port)
         server->port = port;
         server->listener_d = socket(AF_INET, SOCK_STREAM, 0);
         check(server->listener_d != -1, "Can't open socket");
-   
+
         server->running = 1;
 
-        bzero((char *) &server->serv_addr, sizeof(server->serv_addr)); 
+        memset(&server->serv_addr, '0', sizeof(server->serv_addr));
         server->serv_addr.sin_family = AF_INET;
         server->serv_addr.sin_port = (in_port_t)htons(port);
         server->serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -62,11 +63,11 @@ void* Server_listen(Server *server)
                 struct sockaddr_storage client_addr;
 
                 unsigned int address_size = sizeof(client_addr);
-                int foo = accept(server->listener_d,
+                c->connect_d = accept(server->listener_d,
                                 (struct sockaddr*)&client_addr,
                                 &address_size);
 
-                check(foo != -1, "Can't open client socket");
+                check(c->connect_d != -1, "Can't open client socket");
 
                 char *msg = "Connected...";
                 check(send(c->connect_d, msg, strlen(msg), 0) != -1, 
@@ -89,6 +90,8 @@ void Server_close(Server *server)
         pthread_join(server->listen_thread, &result);
 
         // TODO: Close server
+        close(server->listener_d);
+    
         // TODO: Close(client_socket)
 
 
