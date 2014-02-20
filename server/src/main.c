@@ -22,7 +22,7 @@ int main(int argc, char **argv)
         Server_open(s, port);
 
         // Server is running.
-        sleep(30); // SLeep for 1 minute
+        sleep(20);
         Server_close(s);
 
         return 0;        
