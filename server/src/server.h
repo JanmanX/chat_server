@@ -9,7 +9,7 @@
 typedef struct{
         List *client_list;
         int port;
-        int listener_d;
+        int sock_fd;
 
         struct sockaddr_in serv_addr;
        

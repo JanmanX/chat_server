@@ -15,6 +15,7 @@ int main(int argc, char **argv)
         if(port < 1024 || port > 65536)
         {
             log_err("Invalid port number: %d", port);
+            goto error;
         }
 
         Server *s = Server_create();
