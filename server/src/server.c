@@ -80,7 +80,7 @@ void* Server_listen(Server *server)
 
                if(incomming_fd == -1)
                {
-                       sleep(10);
+                       sleep(1);
             
                         if(server->running == 0)
                             return;
