@@ -21,6 +21,7 @@ error:
         return NULL;
 }
 
+
 void Server_open(Server *server, int port)
 {
         server->port = port;
@@ -53,10 +54,13 @@ error:
         return;
 }
 
+
 void* Server_listen(Server *server)
 {
         log_info("Server_listen started");
 
+        //Blocking
+        //TODO: Read and implement: http://beej.us/guide/bgnet/output/html/multipage/advanced.html#blocking
         while(server->running)
         { 
                 Client *c = client_create();
@@ -69,9 +73,12 @@ void* Server_listen(Server *server)
 
                 check(c->connect_d != -1, "Can't open client socket");
 
-                char *msg = "Connected...";
+                char *msg = "Connected...\n";
                 check(send(c->connect_d, msg, strlen(msg), 0) != -1, 
                                 "Cannot send message");
+
+                close(c->connect_d);
+                client_destroy(c); 
         }
 
         log_info("Server_listen() closing");
@@ -89,9 +96,11 @@ void Server_close(Server *server)
         // wait for listen_thread to exit
         pthread_join(server->listen_thread, &result);
 
-        // TODO: Close server ( ? )    
+        //        close(server->listener_d);
+
         // TODO: Close(client_socket)
 
+        log_info("Server closed");
 
-        free(server);
+        //      free(server);
 }

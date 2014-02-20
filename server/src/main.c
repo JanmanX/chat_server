@@ -9,11 +9,8 @@
 
 int main(int argc, char **argv)
 {
-        if(argc < 2)
-        {
-            log_err("Not enough arguments. Missing port number");
-        }
-    
+        check(argc>1, "Argument for port number missing");
+
         int port = atoi(argv[1]);
         if(port < 1024 || port > 65536)
         {
@@ -24,7 +21,7 @@ int main(int argc, char **argv)
         Server_open(s, port);
 
         // Server is running.
-        sleep(60); // SLeep for 1 minute
+        sleep(30); // SLeep for 1 minute
         Server_close(s);
 
         return 0;        
