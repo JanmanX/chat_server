@@ -89,9 +89,7 @@ void Server_close(Server *server)
         // wait for listen_thread to exit
         pthread_join(server->listen_thread, &result);
 
-        // TODO: Close server
-        close(server->listener_d);
-    
+        // TODO: Close server ( ? )    
         // TODO: Close(client_socket)
 
 
