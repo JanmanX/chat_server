@@ -60,7 +60,7 @@ void Server_open(Server *server, int port)
         // Create a new thread and start it
         pthread_create(&server->listen_thread, 
                         NULL, 
-                        Server_listen,
+                        (void*)Server_listen,   // Casting to remove warning
                         (void*)server);
 
         return;

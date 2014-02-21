@@ -22,7 +22,10 @@ int main(int argc, char **argv)
         Server_open(s, port);
 
         // Server is running.
-        sleep(20);
+        // Keep alive until user enters "q"
+        while(getchar()!='q')
+            sleep(1);
+
         Server_close(s);
 
         return 0;        
