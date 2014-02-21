@@ -18,6 +18,9 @@ Server *Server_create()
         Server *server = calloc(1, sizeof(Server));
         check_mem(server);
 
+        server->client_list = List_create();
+        check_mem(server->client_list);
+
         return server;
 error:
         return NULL;
@@ -60,6 +63,7 @@ void Server_open(Server *server, int port)
                         Server_listen,
                         (void*)server);
 
+        return;
 error:
         log_warn("Error occured while opening server");
         return;
@@ -77,28 +81,32 @@ void* Server_listen(Server *server)
         //Blocking
         while(server->running)
         { 
-               incomming_fd = accept(server->sock_fd,
+                incomming_fd = accept(server->sock_fd,
                                 (struct sockaddr*)&client_addr,
                                 &address_size);
 
-               if(incomming_fd == -1)
-               {
-                       sleep(1);
-            
+                if(incomming_fd == -1)
+                {
+                        sleep(1);
+
                         if(server->running == 0)
-                            return;
-                       continue;
-               }
+                                return;
+                        continue;
+                }
 
                 Client *c = client_create();
                 check_mem(c);
 
                 c->connect_d = incomming_fd;
                 c->client_addr = client_addr;
- 
-               char *msg = "Connected...\n";
-               check(send(c->connect_d, msg, strlen(msg), 0) != -1, 
-                               "Cannot send message");
+                
+                char *msg = "Connected...\n";
+                check(send(c->connect_d, msg, strlen(msg), 0) != -1, 
+                                "Cannot send message");
+
+                List_push(server->client_list, c);
+                log_info("A new client just joined the server");
+                log_info("Number of clients online: %d", List_count(server->client_list));
         }
 
         log_info("Server_listen() closing");
@@ -117,11 +125,20 @@ void Server_close(Server *server)
         // wait for listen_thread to exit
         pthread_join(server->listen_thread, &result);
 
+        // Free all clients
+        LIST_FOREACH(server->client_list, first, next, cur) 
+        {
+               client_destroy(cur->value); 
+        }
 
-        // TODO: Close(client_socket)
+        // Free list
+        List_destroy(server->client_list);
+
+        // Close listening socket
         close(server->sock_fd);
 
         log_info("Server closed");
 
-        //      free(server);
+        // Free server
+        free(server);
 }
