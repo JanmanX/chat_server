@@ -106,7 +106,8 @@ void* Server_listen(Server *server)
 
                 List_push(server->client_list, c);
                 log_info("A new client just joined the server");
-                log_info("Number of clients online: %d", List_count(server->client_list));
+                log_info("Number of clients online: %d",
+                         List_count(server->client_list));
         }
 
         log_info("Server_listen() closing");
