@@ -11,8 +11,8 @@
 #include "server.h"
 #include "client.h"
 
-pthread_mutex_t server_lock = PTHREAD_MUTEX_INITIALIZER;
-
+// Allocates and returns a new server.
+// Returns NULL on error
 Server *Server_create()
 {
         Server *server = calloc(1, sizeof(Server));
@@ -23,7 +23,8 @@ error:
         return NULL;
 }
 
-
+// Opens socket and starts listening for incomming connections in a separate 
+// thread.
 void Server_open(Server *server, int port)
 {
         server->port = port;
@@ -41,8 +42,11 @@ void Server_open(Server *server, int port)
                         (struct sockaddr*)&server->serv_addr, 
                         sizeof(server->serv_addr));
 
+
         check(c!=-1, "Can't bind socket");
 
+
+        // Sets the server socket to listen
         check(listen(server->sock_fd, 10) != -1, "Can't listen");
 
         // Make incoming socket non-blocking
@@ -57,21 +61,20 @@ void Server_open(Server *server, int port)
                         (void*)server);
 
 error:
+        log_warn("Error occured while opening server");
         return;
 }
 
-
+// Listens for incomming connections until server->running == 0.
 void* Server_listen(Server *server)
 {
         int incomming_fd;
         struct sockaddr_storage client_addr;
         unsigned int address_size = sizeof(client_addr);
 
-
         log_info("Server_listen started");
 
         //Blocking
-        //TODO: Read and implement: http://beej.us/guide/bgnet/output/html/multipage/advanced.html#blocking
         while(server->running)
         { 
                incomming_fd = accept(server->sock_fd,
@@ -103,6 +106,7 @@ error:
         return;      
 }
 
+// Closes the server and frees all ressources associated with it.
 void Server_close(Server *server)
 {
         log_info("Closing server...");
@@ -113,10 +117,8 @@ void Server_close(Server *server)
         // wait for listen_thread to exit
         pthread_join(server->listen_thread, &result);
 
-        //        
 
         // TODO: Close(client_socket)
-
         close(server->sock_fd);
 
         log_info("Server closed");
