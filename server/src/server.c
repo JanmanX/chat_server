@@ -105,9 +105,16 @@ void* Server_listen(Server *server)
                                 "Cannot send message");
 
                 List_push(server->client_list, c);
+
+                // Create a new thread and start it
+                pthread_create(&c->recv_thread, 
+                                NULL, 
+                                (void*)client_recv, 
+                                (void*)c);
+
                 log_info("A new client just joined the server");
                 log_info("Number of clients online: %d",
-                         List_count(server->client_list));
+                                List_count(server->client_list));
         }
 
         log_info("Server_listen() closing");
@@ -129,7 +136,7 @@ void Server_close(Server *server)
         // Free all clients
         LIST_FOREACH(server->client_list, first, next, cur) 
         {
-               client_destroy(cur->value); 
+                client_destroy(cur->value); 
         }
 
         // Free list

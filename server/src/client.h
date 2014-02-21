@@ -8,9 +8,12 @@
 struct client {
         int connect_d;
         struct sockaddr_storage client_addr;
+        pthread_t recv_thread;
 };
 typedef struct client Client;
 
 Client *client_create();
 void client_destroy(Client* c);
-void* client_listen(struct client* c); 
+void* client_recv(struct client* c);
+
+#endif 
