@@ -13,5 +13,4 @@ typedef struct client Client;
 
 Client *client_create();
 void client_destroy(Client* c);
-
-#endif
+void* client_listen(struct client* c); 

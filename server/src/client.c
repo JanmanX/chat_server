@@ -25,3 +25,8 @@ void client_destroy(Client *c)
 error:
     return;
 }
+
+void *client_listen(struct client* c)
+{
+
+}
