@@ -11,10 +11,9 @@ struct client {
         struct sockaddr_storage client_addr;
         pthread_t recv_thread;
 };
-typedef struct client Client;
 
-Client *client_create();
-void client_destroy(Client* c);
-void* client_recv(struct client* c, volatile int *running);
+struct client *client_create();
+void client_destroy(struct client* c);
+void* client_recv(struct client* c);
 
 #endif 

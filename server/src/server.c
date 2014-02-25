@@ -94,7 +94,7 @@ void* Server_listen(Server *server)
                         continue;
                 }
 
-                Client *c = client_create();
+                struct client *c = client_create();
                 check_mem(c);
 
                 c->connect_d = incomming_fd;
@@ -105,9 +105,9 @@ void* Server_listen(Server *server)
                                 "Cannot send message");
 
                 List_push(server->client_list, c);
-
-                
-
+    
+                c->running = 1;
+    
                 // Create a new thread and start it
                 pthread_create(&c->recv_thread, 
                                 NULL, 
@@ -137,22 +137,14 @@ void Server_close(Server *server)
         // wait for listen_thread to exit
         pthread_join(server->listen_thread, &result);
 
+        // TODO: split into more loops to increase speed dramatically
         LIST_FOREACH(server->client_list, first, next, cur)
         {
                 c = (struct client*)cur->value;
                 c->running = 0;
-        }
-    
-        LIST_FOREACH(server->client_list, first, next, cur)
-        {
                 c = (struct client*)cur->value;
-                ptread_join(c->recv_thread, &result);
-        }
-
-        // Free all clients
-        LIST_FOREACH(server->client_list, first, next, cur) 
-        {
-                client_destroy(cur->value); 
+                pthread_join(c->recv_thread, &result);
+                client_destroy(cur->value);
         }
 
         // Free list
