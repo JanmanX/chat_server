@@ -31,11 +31,11 @@ error:
     return;
 }
 
-void *client_recv(struct client* c)
+void *client_recv(struct client* c, volatile int *running)
 {
         // Make incoming socket non-blocking
         check(fcntl(c->connect_d, F_SETFL, O_NDELAY)>=0, 
-                        "Cannot make socket non-blocking");
+                        "Cannot make client socket non-blocking");
 
         // Create buffer
         char* buffer = calloc(BUFFER_SIZE, sizeof(char));
@@ -43,16 +43,16 @@ void *client_recv(struct client* c)
         
         int len = 0;
 
-        while(1)
-        {
-            
+        while(*c->running == 1)
+        { 
             len = recv(c->connect_d, buffer, sizeof(buffer), 0);
             if(len > 0)
             {
                 fprintf(stdout, "%s", buffer);
                 memset(buffer, 0, sizeof(buffer));
                 len = 0;
-            }       
+            }
+            sleep(1); 
         }
 
 error:

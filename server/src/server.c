@@ -106,6 +106,8 @@ void* Server_listen(Server *server)
 
                 List_push(server->client_list, c);
 
+                
+
                 // Create a new thread and start it
                 pthread_create(&c->recv_thread, 
                                 NULL, 
@@ -128,10 +130,24 @@ void Server_close(Server *server)
         log_info("Closing server...");
 
         server->running = 0;
+        struct client *c;
+
         void *result = NULL;
 
         // wait for listen_thread to exit
         pthread_join(server->listen_thread, &result);
+
+        LIST_FOREACH(server->client_list, first, next, cur)
+        {
+                c = (struct client*)cur->value;
+                c->running = 0;
+        }
+    
+        LIST_FOREACH(server->client_list, first, next, cur)
+        {
+                c = (struct client*)cur->value;
+                ptread_join(c->recv_thread, &result);
+        }
 
         // Free all clients
         LIST_FOREACH(server->client_list, first, next, cur) 
