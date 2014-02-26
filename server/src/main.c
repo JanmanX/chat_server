@@ -7,6 +7,7 @@
 #include "error.h"
 #include "dbg.h"
 
+
 int main(int argc, char **argv)
 {
         check(argc>1, "Argument for port number missing");
@@ -22,14 +23,13 @@ int main(int argc, char **argv)
         Server_open(s, port);
 
         // Server is running.
-        // Keep alive until user enters "q"
+        // Keep alive until user enters "q\n"
         while(getchar()!='q')
             ;
 
         Server_close(s);
 
         return 0;        
-
 error:
         return -1;
 }
