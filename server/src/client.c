@@ -5,13 +5,13 @@
 
 #include "client.h"
 
+// Allocates new memory on the heap and returns a pointer to a new client.
 struct client *client_create()
 {
-        struct client *c = calloc(1, sizeof(struct client)); // calloc for cleared memory
+        struct client *c = calloc(1, sizeof(struct client));
         check(c != NULL, "calloc returned NULL");
 
         return c;
-
 error:
         return NULL;
 }
@@ -28,6 +28,7 @@ error:
         return;
 }
 
+// Receive loop for the client. Server calls this function in a separate thread.
 void *client_recv(struct client* c)
 {
         log_info("Starting listen loop for client");
@@ -51,8 +52,10 @@ void *client_recv(struct client* c)
                         memset(buffer, 0, sizeof(buffer));
                         len = 0;
                 }
-                sleep(1); 
-
+                else
+                {
+                        sleep(1); 
+                } 
         }
 
         log_info("Client recv_thread closed");
