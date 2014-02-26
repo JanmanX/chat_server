@@ -5,9 +5,6 @@
 
 #include "client.h"
 
-
-#define BUFFER_SIZE 1024
-
 struct client *client_create()
 {
         struct client *c = calloc(1, sizeof(struct client)); // calloc for cleared memory

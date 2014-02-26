@@ -21,4 +21,5 @@ Server *Server_create();
 void Server_open(Server* server, int port);
 void Server_close(Server* server);
 void* Server_listen(Server* server);
+void* Server_send(Server* server, char* msg);
 #endif

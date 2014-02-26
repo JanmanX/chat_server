@@ -5,6 +5,8 @@
 
 #include "dbg.h"
 
+#define BUFFER_SIZE 65536 // 2 ^ 16.
+
 struct client {
         int connect_d;
         volatile int running;

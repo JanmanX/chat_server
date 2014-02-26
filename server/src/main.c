@@ -24,7 +24,7 @@ int main(int argc, char **argv)
         // Server is running.
         // Keep alive until user enters "q"
         while(getchar()!='q')
-            sleep(1);
+            ;
 
         Server_close(s);
 

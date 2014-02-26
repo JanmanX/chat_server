@@ -69,7 +69,7 @@ error:
         return;
 }
 
-// Listens for incomming connections until server->running == 0.
+// Listens for incoming connections until server->running == 0.
 void* Server_listen(Server *server)
 {
         int incomming_fd;
@@ -78,7 +78,7 @@ void* Server_listen(Server *server)
 
         log_info("Server_listen started");
 
-        //Blocking
+
         while(server->running)
         { 
                 incomming_fd = accept(server->sock_fd,
@@ -89,25 +89,25 @@ void* Server_listen(Server *server)
                 {
                         sleep(1);
 
-                        if(server->running == 0)
-                                return;
                         continue;
                 }
 
+                // Client connected, create a new client struct, send a message
+                // to the client and start listening thread
                 struct client *c = client_create();
                 check_mem(c);
 
                 c->connect_d = incomming_fd;
                 c->client_addr = client_addr;
-                
+
                 char *msg = "Connected...\n";
                 check(send(c->connect_d, msg, strlen(msg), 0) != -1, 
                                 "Cannot send message");
 
                 List_push(server->client_list, c);
-    
+
                 c->running = 1;
-    
+
                 // Create a new thread and start it
                 pthread_create(&c->recv_thread, 
                                 NULL, 
@@ -124,14 +124,43 @@ error:
         return;      
 }
 
+// Sends a message to ALL clients on connected.
+// TODO: If send fails, remove client from list.
+void *Server_send(Server* server, char* msg)
+{
+        log_info("Streaming message: ");
+
+        int len = 0;
+        struct client* c;
+
+        LIST_FOREACH(server->client_list, first, next, cur)
+        {
+                c = (struct client*)cur->value;
+
+                // Send the message and record how many bytes were sent
+                len = send(c->connect_d, msg, BUFFER_SIZE,0);
+
+                if(len == 0)
+                {
+                        log_info("No bytes were sent");
+
+                        // TODO: REMOVE CLIENT FROM LIST
+                }
+        }
+}
+
 // Closes the server and frees all ressources associated with it.
 void Server_close(Server *server)
 {
         log_info("Closing server...");
 
+        // Signals the server termination
         server->running = 0;
+
+        // Temporary client instance
         struct client *c;
 
+        // Result of the listening thread. As of now, nothing is returned.
         void *result = NULL;
 
         // wait for listen_thread to exit
@@ -142,8 +171,11 @@ void Server_close(Server *server)
         {
                 c = (struct client*)cur->value;
                 c->running = 0;
-                c = (struct client*)cur->value;
+
+                // Wait for the thread to finish.
                 pthread_join(c->recv_thread, &result);
+
+                // Free client resources
                 client_destroy(cur->value);
         }
 
