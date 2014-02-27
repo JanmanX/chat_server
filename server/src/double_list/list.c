@@ -111,7 +111,8 @@ void *List_remove_specific(List *list, void *value)
         }
 
 error:
-        return;
+        log_info("Failed to remove specific node from List");
+        return NULL;
 }
 
 void *List_remove(List *list, ListNode *node)

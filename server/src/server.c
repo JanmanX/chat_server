@@ -60,7 +60,7 @@ void Server_open(Server *server, int port)
         // Create a new thread and start it
         pthread_create(&server->listen_thread, 
                         NULL, 
-                        (void*)Server_listen,   // Casting to remove warning
+                        (void*)Server_listen,
                         (void*)server);
 
         return;
@@ -145,6 +145,14 @@ void *Server_send(Server* server, char* msg)
                         log_info("No bytes were sent");
 
                         // TODO: REMOVE CLIENT FROM LIST
+                        c->running = 0;
+
+                        // Wait for the thread to finish.
+                        void* result = NULL;                    
+                        pthread_join(c->recv_thread, &result);
+
+                        client_destroy(c);
+                        List_remove_specific(server->client_list, (void*)c);
                 }
         }
 }

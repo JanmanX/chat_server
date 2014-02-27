@@ -58,6 +58,7 @@ void *client_recv(struct client* c)
                 } 
         }
 
+        free(buffer);
         log_info("Client recv_thread closed");
 error:
         return;
