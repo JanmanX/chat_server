@@ -48,18 +48,19 @@ void *client_recv(struct client* c)
                 len = recv(c->connect_d, buffer, BUFFER_SIZE, 0);
                 if(len > 0)
                 {
-                        printf("%s", buffer);
-                        memset(buffer, 0, sizeof(buffer));
-                        len = 0;
-                }
-                else
-                {
-                        sleep(1); 
-                } 
-        }
+						printf("%s", buffer);
+						Server_send(c->owner, buffer, len);   
+						memset(buffer, 0, sizeof(buffer));
+						len = 0;
+				}
+				else
+				{
+						sleep(1); 
+				} 
+		}
 
-        free(buffer);
-        log_info("Client recv_thread closed");
+		free(buffer);
+		log_info("Client recv_thread closed");
 error:
-        return;
+		return;
 }

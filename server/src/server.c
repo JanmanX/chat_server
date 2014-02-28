@@ -88,7 +88,6 @@ void* Server_listen(Server *server)
                 if(incomming_fd == -1)
                 {
                         sleep(1);
-
                         continue;
                 }
 
@@ -99,102 +98,113 @@ void* Server_listen(Server *server)
 
                 c->connect_d = incomming_fd;
                 c->client_addr = client_addr;
+				c->owner = server;
+	
 
-                char *msg = "Connected...\n";
+                char msg[50]; // Message buffer
+				sprintf(msg, "%s","Connected...\n");
+
                 check(send(c->connect_d, msg, strlen(msg), 0) != -1, 
                                 "Cannot send message");
 
-                List_push(server->client_list, c);
+				bzero(msg, 50); // Clear message buffer
 
-                c->running = 1;
+				sprintf(msg, "%s %d", "Clients online: ", 
+								List_count(server->client_list) + 1);
 
-                // Create a new thread and start it
-                pthread_create(&c->recv_thread, 
-                                NULL, 
-                                (void*)client_recv, 
-                                (void*)c);
+				check(send(c->connect_d, msg, 50, 0) != -1, 
+										"Cannot send message");
 
-                log_info("A new client just joined the server");
-                log_info("Number of clients online: %d",
-                                List_count(server->client_list));
-        }
 
-        log_info("Server_listen() closing");
+				List_push(server->client_list, c);
+
+				c->running = 1;
+
+				// Create a new thread and start it
+				pthread_create(&c->recv_thread, 
+								NULL, 
+								(void*)client_recv, 
+								(void*)c);
+
+				log_info("A new client just joined the server");
+				log_info("Number of clients online: %d",
+								List_count(server->client_list));
+		}
+
+		log_info("Server_listen() closing");
 error:
-        return;      
+		return;      
 }
 
 // Sends a message to ALL clients on connected.
 // TODO: If send fails, remove client from list.
-void *Server_send(Server* server, char* msg)
+void *Server_send(Server* server, char* msg, int msg_len)
 {
-        log_info("Streaming message: ");
+		int len = 0;
+		struct client* c;
 
-        int len = 0;
-        struct client* c;
+		LIST_FOREACH(server->client_list, first, next, cur)
+		{
+				c = (struct client*)cur->value;
 
-        LIST_FOREACH(server->client_list, first, next, cur)
-        {
-                c = (struct client*)cur->value;
+				// Send the message and record how many bytes were sent
+				len = send(c->connect_d, msg, msg_len,0);
 
-                // Send the message and record how many bytes were sent
-                len = send(c->connect_d, msg, BUFFER_SIZE,0);
+				if(len == 0)
+				{
+						log_info("No bytes were sent");
 
-                if(len == 0)
-                {
-                        log_info("No bytes were sent");
+						// TODO: REMOVE CLIENT FROM LIST
+						c->running = 0;
 
-                        // TODO: REMOVE CLIENT FROM LIST
-                        c->running = 0;
+						// Wait for the thread to finish.
+						void* result = NULL;                    
+						pthread_join(c->recv_thread, &result);
 
-                        // Wait for the thread to finish.
-                        void* result = NULL;                    
-                        pthread_join(c->recv_thread, &result);
-
-                        client_destroy(c);
-                        List_remove_specific(server->client_list, (void*)c);
-                }
-        }
+						client_destroy(c);
+						List_remove_specific(server->client_list, (void*)c);
+				}
+		}
 }
 
 // Closes the server and frees all ressources associated with it.
 void Server_close(Server *server)
 {
-        log_info("Closing server...");
+		log_info("Closing server...");
 
-        // Signals the server termination
-        server->running = 0;
+		// Signals the server termination
+		server->running = 0;
 
-        // Temporary client instance
-        struct client *c;
+		// Temporary client instance
+		struct client *c;
 
-        // Result of the listening thread. As of now, nothing is returned.
-        void *result = NULL;
+		// Result of the listening thread. As of now, nothing is returned.
+		void *result = NULL;
 
-        // wait for listen_thread to exit
-        pthread_join(server->listen_thread, &result);
+		// wait for listen_thread to exit
+		pthread_join(server->listen_thread, &result);
 
-        // TODO: split into more loops to increase speed dramatically
-        LIST_FOREACH(server->client_list, first, next, cur)
-        {
-                c = (struct client*)cur->value;
-                c->running = 0;
+		// TODO: split into more loops to increase speed dramatically
+		LIST_FOREACH(server->client_list, first, next, cur)
+		{
+				c = (struct client*)cur->value;
+				c->running = 0;
 
-                // Wait for the thread to finish.
-                pthread_join(c->recv_thread, &result);
+				// Wait for the thread to finish.
+				pthread_join(c->recv_thread, &result);
 
-                // Free client resources
-                client_destroy(cur->value);
-        }
+				// Free client resources
+				client_destroy(cur->value);
+		}
 
-        // Free list
-        List_destroy(server->client_list);
+		// Free list
+		List_destroy(server->client_list);
 
-        // Close listening socket
-        close(server->sock_fd);
+		// Close listening socket
+		close(server->sock_fd);
 
-        log_info("Server closed");
+		log_info("Server closed");
 
-        // Free server
-        free(server);
+		// Free server
+		free(server);
 }

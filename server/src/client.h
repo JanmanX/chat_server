@@ -3,15 +3,18 @@
 
 #include <sys/socket.h>
 
+#include "server.h"
 #include "dbg.h"
 
-#define BUFFER_SIZE 65536 // 2 ^ 16.
+#define BUFFER_SIZE 2048 // Should be enough.
 
 struct client {
         int connect_d;
         volatile int running;
-        struct sockaddr_storage client_addr;
-        pthread_t recv_thread;
+
+		Server* owner;
+		struct sockaddr_storage client_addr;
+		pthread_t recv_thread;
 };
 
 struct client *client_create();
