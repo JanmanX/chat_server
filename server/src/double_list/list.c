@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#include <dbg.h>
+#include "../dbg.h"
 
 #include "list.h"
 
